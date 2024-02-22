@@ -1,0 +1,77 @@
+---
+- name: Run kafka container
+  community.docker.docker_compose:
+    project_name: kafka
+    definition:
+      version: '3.5'
+      services: |
+        {{
+          {
+            item.name: {
+              "image": kafka_docker_image,
+              "container_name": item.name,
+              "hostname": item.hostname | default(item.name),
+              "labels": item.labels | default([]),
+              "environment": item.environment | default([]),
+              "ports": item.ports | default([]),
+              "volumes": [
+                item.volume[0] ~ ":/bitnami/kafka"
+              ]
+            }
+          }
+        }}
+      networks:
+        default:
+          external:
+            name: "{{ kafka_docker_network_name }}"
+      volumes: |
+        {{
+          {
+            item.volume[0]: {
+              "driver": "local"
+            }
+          }
+        }}
+  loop: "{{ kafka_docker_services }}"
+  when:
+    - not kafka_run_in_swarm
+
+- name: Run kafka stack in swarm
+  community.docker.docker_stack:
+    state: present
+    name: "{{ kafka_stack_name }}"
+    with_registry_auth: yes
+    compose:
+      - version: '3.5'
+        services: |
+          {{
+            {
+              item.name: {
+                "image": kafka_docker_image,
+                "hostname": item.hostname | default(item.name),
+                "labels": item.labels | default([]),
+                "environment": item.environment | default([]),
+                "deploy": item.deploy | default({}),
+                "ports": item.ports | default([]),
+                "volumes": [
+                  item.volume[0] ~ ":/bitnami/kafka"
+                ]
+              }
+            }
+          }}
+        networks:
+          default:
+            external:
+              name: "{{ kafka_docker_network_name }}"
+        volumes: |
+          {{
+            {
+              item.volume[0]: {
+                "driver": "local"
+              }
+            }
+          }}
+  run_once: True
+  loop: "{{ kafka_docker_services }}"
+  when:
+    - kafka_run_in_swarm

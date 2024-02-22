@@ -1,0 +1,28 @@
+---
+kafka_docker_image: bitnami/kafka:latest
+kafka_stack_name: kafka
+kafka_volume_name: kafka_volume0
+kafka_port: "9092"
+kafka_docker_network_name: kafka_network
+kafka_docker_services:
+  - name: kafka
+    # hostname: kafka
+    # labels: []
+    environment:
+      - KAFKA_KRAFT_CLUSTER_ID=c1LusqidTh2cSfwE_nmhmw
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://127.0.0.1:9092
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    deploy:
+      placement:
+        constraints:
+          - node.labels.kafka == true
+    ports:
+      - "{{ kafka_port }}:9094"
+    volume:
+      - "{{ kafka_volume_name }}"
+kafka_run_in_swarm: false

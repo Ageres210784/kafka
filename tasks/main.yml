@@ -1,5 +1,5 @@
 ---
-- name: Run kafka container
+- name: Run kafka with compose
   community.docker.docker_compose:
     project_name: kafka
     definition:

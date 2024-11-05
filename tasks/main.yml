@@ -1,9 +1,8 @@
 ---
 - name: Run kafka with compose
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_name: kafka
     definition:
-      version: '3.5'
       services: |
         {{
           {
@@ -22,8 +21,8 @@
         }}
       networks:
         default:
-          external:
-            name: "{{ kafka_docker_network_name }}"
+          external: true
+          name: "{{ kafka_docker_network_name }}"
       volumes: |
         {{
           {
